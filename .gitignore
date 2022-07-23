@@ -1,0 +1,5 @@
+*.o
+saavn_cp
+.ccls
+.ccls-cache/
+test*
