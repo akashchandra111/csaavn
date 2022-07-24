@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAAVN_TYPES_H
+#define SAAVN_TYPES_H
 
 #include <stdlib.h>
 
@@ -39,3 +40,5 @@ void saavn_album_arr_free(saavn_album_arr_t*);
 
 saavn_song_arr_t* saavn_song_arr_init(size_t song_count);
 void saavn_song_arr_free(saavn_song_arr_t*);
+
+#endif

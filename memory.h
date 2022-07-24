@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SAAVN_MEMORY_H
+#define SAAVN_MEMORY_H
 
 #include <stdint.h>
 #include <stddef.h>
@@ -18,3 +19,5 @@ typedef struct	{
 
 memory_dyn* mem_dyn_init(size_t);
 void mem_dyn_free(memory_dyn*);
+
+#endif

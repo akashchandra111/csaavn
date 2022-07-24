@@ -1,7 +1,12 @@
 #include "saavn_types.h"
 
+#include <string.h>
+
 saavn_album_t* saavn_album_init()	{
-	return (saavn_album_t *) malloc(sizeof(saavn_album_t));
+	saavn_album_t *album = (saavn_album_t *) malloc(sizeof(saavn_album_t));
+	memset(album, 0, sizeof(*album));
+
+	return album;
 }
 
 void saavn_album_free(saavn_album_t *album)	{
@@ -12,7 +17,10 @@ void saavn_album_free(saavn_album_t *album)	{
 }
 
 saavn_song_t* saavn_song_init()	{
-	return (saavn_song_t *) malloc(sizeof(saavn_song_t));
+	saavn_song_t *song = (saavn_song_t *) malloc(sizeof(saavn_song_t));
+	memset(song, 0, sizeof(*song));
+
+	return song;
 }
 
 void saavn_song_free(saavn_song_t *song)	{
@@ -30,6 +38,7 @@ saavn_album_arr_t* saavn_album_arr_init(size_t album_count)	{
 		
 		if (albums->album)	{
 			albums->len = album_count;
+			memset(albums->album, 0, sizeof(saavn_album_t) * album_count);
 		} else	{
 			free(albums);
 			albums = NULL;
@@ -59,6 +68,7 @@ saavn_song_arr_t* saavn_song_arr_init(size_t song_count)	{
 		
 		if (songs->song)	{
 			songs->len = song_count;
+			memset(songs->song, 0, sizeof(saavn_song_t) * song_count);
 		} else	{
 			free(songs);
 			songs = NULL;
