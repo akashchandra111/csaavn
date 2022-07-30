@@ -5,7 +5,7 @@
 
 typedef struct	{
 	char url[256];
-	char description[128];
+	char description[256];
 	char title[64];
 	char album[64];
 	char id[16];

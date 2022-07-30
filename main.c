@@ -23,6 +23,8 @@ int main(void)	{
 	size_t song_len = strlen(search_item);
 	url_escaped(search_item, song_len--);	// reducing char len by 1 to remove \n
 
+	curl_global_init(CURL_GLOBAL_DEFAULT);
+
 	memory_dyn *resp = mem_dyn_init(RESP_BUF_LEN);
 
 	if (resp)	{
@@ -80,5 +82,6 @@ int main(void)	{
 
 end:
 	mem_dyn_free(resp);
+	curl_global_cleanup();
 	return 0;
 }

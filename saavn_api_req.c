@@ -1,25 +1,34 @@
 #include "saavn_api_req.h"
 
 const char SEARCH_API_URL[] = "https://www.jiosaavn.com/api.php?__call=autocomplete.get&_format=json&_marker=0&cc=in&includeMetaTags=1&query=";
-const size_t SEARCH_API_URL_LEN = sizeof(SEARCH_API_URL)/sizeof(char);
-
 const char SONG_API_URL[] = "https://www.jiosaavn.com/api.php?__call=song.getDetails&cc=in&_marker=0%3F_marker%3D0&_format=json&pids=";
-const size_t SONG_API_URL_LEN = sizeof(SONG_API_URL)/sizeof(char);
+// const char ALBUM_API_URL[] = "https://www.jiosaavn.com/api.php?__call=content.getAlbumDetails&_format=json&cc=in&_marker=0%3F_marker%3D0&albumid=";
+// const char PLAYLIST_API_URL[] = "https://www.jiosaavn.com/api.php?__call=playlist.getDetails&_format=json&cc=in&_marker=0%3F_marker%3D0&listid=";
+// const char LYRICS_API_URL[] = "https://www.jiosaavn.com/api.php?__call=lyrics.getLyrics&ctx=web6dot0&api_version=4&_format=json&_marker=0%3F_marker%3D0&lyrics_id=";
 
-const char ALBUM_API_URL[] = "https://www.jiosaavn.com/api.php?__call=content.getAlbumDetails&_format=json&cc=in&_marker=0%3F_marker%3D0&albumid=";
-const size_t ALBUM_API_URL_LEN = sizeof(ALBUM_API_URL)/sizeof(char);
+const size_t SEARCH_API_URL_LEN = sizeof(SEARCH_API_URL);
+const size_t SONG_API_URL_LEN = sizeof(SONG_API_URL);
+// const size_t ALBUM_API_URL_LEN = sizeof(ALBUM_API_URL);
+// const size_t PLAYLIST_API_URL_LEN = sizeof(PLAYLIST_API_URL);
+// const size_t LYRICS_API_URL_LEN = sizeof(LYRICS_API_URL);
 
-const char PLAYLIST_API_URL[] = "https://www.jiosaavn.com/api.php?__call=playlist.getDetails&_format=json&cc=in&_marker=0%3F_marker%3D0&listid=";
-const size_t PLAYLIST_API_URL_LEN = sizeof(PLAYLIST_API_URL)/sizeof(char);
+const char SONG_DOWNLOAD_URL[][64] = {
+	"https://sklktcdnems07.cdnsrv.jio.com/jiosaavn.cdn.jio.com/",
+	"https://sklktecdnems03.cdnsrv.jio.com/jiosaavn.cdn.jio.com/"
+};
 
-const char LYRICS_API_URL[] = "https://www.jiosaavn.com/api.php?__call=lyrics.getLyrics&ctx=web6dot0&api_version=4&_format=json&_marker=0%3F_marker%3D0&lyrics_id=";
-const size_t LYRICS_API_URL_LEN = sizeof(LYRICS_API_URL)/sizeof(char);
+const char BITRATE[][5] = { "_320", "_256", "_128", "_96" };
 
-const char SONG_DOWNLOAD_URL[] = "https://sklktcdnems07.cdnsrv.jio.com/jiosaavn.cdn.jio.com/";
-const char SONG_DOWNLOAD_URL_1[] = "https://sklktecdnems03.cdnsrv.jio.com/jiosaavn.cdn.jio.com/";
+const char EXTENSION[][5] = { ".mp3", ".mp4" };
 
-const size_t SONG_DOWNLOAD_URL_LEN = sizeof(SONG_DOWNLOAD_URL)/sizeof(char);
-const size_t SONG_DOWNLOAD_URL_1_LEN = sizeof(SONG_DOWNLOAD_URL_1_LEN)/sizeof(char);
+const size_t SONG_DOWNLOAD_URL_LEN[] = {
+	sizeof(SONG_DOWNLOAD_URL[0]),
+	sizeof(SONG_DOWNLOAD_URL[1]),
+};
+
+const size_t DOWNLOAD_URLS_LEN = sizeof(SONG_DOWNLOAD_URL)/sizeof(SONG_DOWNLOAD_URL[0]);
+const size_t BITRATES_LEN = sizeof(BITRATE)/sizeof(BITRATE[0]);
+const size_t EXTENSIONS_LEN = sizeof(EXTENSION)/sizeof(EXTENSION[0]);
 
 static size_t search_write_cb(char *data, size_t size, size_t len, void *user_data)	{
 	memory_dyn *mem = (memory_dyn *) user_data;
@@ -50,7 +59,6 @@ bool saavn_perform_search(
 		memory_dyn *mem)	{
 
 	CURL *handle; 
-	curl_global_init(CURL_GLOBAL_ALL);
 	handle = curl_easy_init();
 	bool is_success = false;
 
@@ -69,13 +77,12 @@ bool saavn_perform_search(
 		if (res != CURLE_OK)	{
 			fprintf(stderr, "request failed: %s\n", curl_easy_strerror(res));
 			goto cleanup;
-		}
+		} 
 
 		is_success = true;
 
 	cleanup:
 		curl_easy_cleanup(handle);
-		curl_global_cleanup();
 	}
 
 	if (search_url)	free(search_url);
@@ -85,7 +92,6 @@ bool saavn_perform_search(
 
 bool saavn_get_song_url(char *song_id, size_t song_id_len, memory_dyn *mem)	{
 	CURL *handle; 
-	curl_global_init(CURL_GLOBAL_ALL);
 	handle = curl_easy_init();
 	bool is_success = false;
 
@@ -110,7 +116,6 @@ bool saavn_get_song_url(char *song_id, size_t song_id_len, memory_dyn *mem)	{
 
 	cleanup:
 		curl_easy_cleanup(handle);
-		curl_global_cleanup();
 	}
 
 	if (search_url)	free(search_url);
@@ -121,23 +126,14 @@ bool saavn_get_song_url(char *song_id, size_t song_id_len, memory_dyn *mem)	{
 
 bool saavn_song_download(char *appended_url, size_t url_len, char *filename, size_t filename_len)	{
 	CURL *handle; 
-	curl_global_init(CURL_GLOBAL_ALL);
 	handle = curl_easy_init();
+
 	bool is_success = false;
 	
 	// Clear the junk in appended URL
 	char dir1[8] = { 0 };
-	char dir2[32] = { 0 };
-	char ext[5] = { 0 };
+	char dir2[64] = { 0 };
 
-	// memset(dir1, 0, 8);
-	// memset(dir2, 0, 32);
-	// memset(ext, 0, 5);
-
-	char const *bitrate_320 = "_320";
-	// char const *bitrate_160 = "_160";
-	// char const *bitrate_96 = "_96";
-	
 	// Get sub-directory in URL
 	int ap_idx = 0;
 	for (int j=0, slash_count = 0; ap_idx<url_len && slash_count < 2; ++ap_idx)	{
@@ -161,38 +157,31 @@ bool saavn_song_download(char *appended_url, size_t url_len, char *filename, siz
 		}
 	}
 
-	// Get extension
-	for (int dot_encounter = 0; ap_idx<url_len && dot_encounter < 1; ++ap_idx)	{
-		if (appended_url[ap_idx] == '.')	{
-			for (int k=0; k<4; ++k)	ext[k] = appended_url[ap_idx++];
-			break;
-		}
-	}
+	size_t ext_idx = 0;
+	size_t bitrate_idx = 0;
+	size_t download_url_idx = 0;
 
-	// const size_t DOWNLOAD_LINK_LEN = SONG_DOWNLOAD_URL_LEN + 1 + strlen(dir1) + 1 + strlen(dir2) + strlen(bitrate_320) + strlen(ext) + 1;
-	char *search_url = (char *) malloc(2048);
-	memset(search_url, 0, 2048);
+	const size_t SEARCH_URL_BUFFER_LEN = 2048;
+	const size_t FILENAME_BUFFER_LEN = 128;
 
-	// const size_t SAVED_FILENAME_LEN = filename_len + strlen(bitrate_320) + strlen(ext) + 1;
-	char *saved_filename = (char *) malloc(128);
-	memset(saved_filename, 0, 128);
-	
-	if (search_url)	snprintf(search_url, 2047, "%s%s/%s%s%s", SONG_DOWNLOAD_URL, dir1, dir2, bitrate_320, ext);
-	if (saved_filename)	snprintf(saved_filename, 127, "%s%s%s", filename, bitrate_320, ext);
+	char * const search_url = (char *) malloc(SEARCH_URL_BUFFER_LEN);
+	char * const saved_filename = (char *) malloc(FILENAME_BUFFER_LEN);
 
-	/*
-	printf("dir1: %s\n", dir1);
-	printf("dir2: %s\n", dir2);
-	printf("bitrate: %s\n", bitrate_320);
-	printf("ext: %s\n", ext);
-	printf("Download URL: %s\n", search_url);
-	printf("Saved filename: %s\n", saved_filename);
-	*/
+	// printf("total urls: %zu, total bitrates: %zu, total ext: %zu\n", DOWNLOAD_URLS_LEN, BITRATES_LEN, EXTENSIONS_LEN);
 
-	FILE *file_ptr = fopen(saved_filename, "wb");
+	while (true)	{
+		const char *EXT = EXTENSION[ext_idx];
+		const char *BR = BITRATE[bitrate_idx];
+		const char *DL_URL = SONG_DOWNLOAD_URL[download_url_idx];
 
-	if (handle && file_ptr)	{
+		if (search_url)	snprintf(search_url, SEARCH_URL_BUFFER_LEN-1, "%s%s/%s%s%s", DL_URL, dir1, dir2, BR, EXT);
+		if (saved_filename)	snprintf(saved_filename, FILENAME_BUFFER_LEN-1, "%s%s%s", filename, BR, EXT);
 
+		// printf("search url: %s\nfilename: %s\n", search_url, saved_filename);
+
+		FILE *file_ptr = fopen(saved_filename, "wb");
+
+		// set-up cURL
 		curl_easy_setopt(handle, CURLOPT_URL, search_url);
 		curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_file);
 		curl_easy_setopt(handle, CURLOPT_WRITEDATA, file_ptr);
@@ -201,19 +190,42 @@ bool saavn_song_download(char *appended_url, size_t url_len, char *filename, siz
 
 		if (res != CURLE_OK)	{
 			fprintf(stderr, "request failed: %s\n", curl_easy_strerror(res));
-			goto cleanup;
+			break;
+		}
+		
+		// file must be generated, check file length to retry if size is small
+		fseek(file_ptr, 0, SEEK_END);
+		size_t const file_len = ftell(file_ptr);
+		fclose(file_ptr);
+
+		if (file_len > 1024)	{
+			is_success = true;
+			break;
+		} else	{
+			fprintf(stderr, "Couldn't download, retrying...\n");
+			// fprintf(stderr, "selected ext: %s, selected bitrate: %s, selected url: %s\n", EXT, BR, DL_URL);
+			if (remove(saved_filename) != 0)	{
+				fprintf(stderr, "Couldn't remove file: %s, exiting...\n", saved_filename);
+				break;
+			}
 		}
 
-		is_success = true;
-
-	cleanup:
-		fclose(file_ptr);
-		curl_easy_cleanup(handle);
-		curl_global_cleanup();
+		// failed attempt?
+		if (bitrate_idx == BITRATES_LEN-1)	{
+			bitrate_idx = 0;
+			if (ext_idx == EXTENSIONS_LEN-1)	{
+				ext_idx = 0;
+				if (download_url_idx == DOWNLOAD_URLS_LEN-1)	{
+					download_url_idx = 0;
+					break;
+				} else	++download_url_idx;
+			} else	++ext_idx;
+		} else	++bitrate_idx;
 	}
 
 	if (search_url)	free(search_url);
 	if (saved_filename)	free(saved_filename);
 
+	if (handle)	curl_easy_cleanup(handle);
 	return is_success;
 }
