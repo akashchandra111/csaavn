@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "memory.h"
+#include "saavn_types.h"
 
 bool saavn_perform_search(
 	char const *song_name, 
@@ -23,8 +24,7 @@ bool saavn_get_song_url(
 bool saavn_song_download(
 	char *appended_url, 
 	size_t url_len, 
-	char *filename, 
-	size_t filename_len
+	saavn_song_t *song_details
 );
 
 #endif

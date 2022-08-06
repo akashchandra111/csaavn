@@ -34,22 +34,25 @@ int main(void)	{
 			if (!songs)	goto end;
 			
 			for (int i=0; i<songs->len; ++i)	{
-				printf("Song name: %s\n", songs->song[i].title);
-				printf("Description: %s\n", songs->song[i].description);
-				printf("Album: %s\n", songs->song[i].album);
-				printf("URL: %s\n", songs->song[i].url);
-				printf("ID: %s\n", songs->song[i].id);
-				printf("===========================\n");
+				printf("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+				printf("┃Song name%6s: %-70s┃\n", "", songs->song[i].title);
+				printf("┃Description%4s: %-70s┃\n", "", songs->song[i].description);
+				printf("┃Album%10s: %-70s┃\n", "", songs->song[i].album);
+				printf("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
 			}
 
-			printf("Choose (%zu - %zu): ", 1ul, songs->len);
+			printf("Choose (%zu - %zu), -1 to quit: ", 1ul, songs->len);
 			int choice = 0;
 			int retries = 3;
 			while (choice < 1ul || choice > songs->len)	{
 				scanf("%d", &choice);
+				if (choice == -1)	{
+					printf("Exiting!\n");
+					goto list_cleanup;
+				}
 				if (choice < 1ul || choice > songs->len)	printf("Invalid input, try again: ");
 
-				if (!retries)	goto end;
+				if (!retries)	goto list_cleanup;
 				else	retries--;
 			}
 
@@ -62,20 +65,18 @@ int main(void)	{
 
 			if (saavn_get_song_url(id, id_len, resp))	{
 				filter_song_url_from_search(id_len, song, resp);
-
-				printf("Song name: %s\n", song->title);
-				printf("Description: %s\n", song->description);
-				printf("Album: %s\n", song->album);
-				printf("URL: %s\n", song->url);
-				printf("ID: %s\n", song->id);
-				printf("===========================\n");
-			
+				printf("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+				printf("┃Song name%6s: %-70s┃\n", "", song->title);
+				printf("┃Description%4s: %-70s┃\n", "", song->description);
+				printf("┃Album%10s: %-70s┃\n", "", song->album);
+				printf("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
 			}
 
-			if (saavn_song_download(song->url, strlen(song->url), song->title, strlen(song->title)))	{
+			if (saavn_song_download(song->url, strlen(song->url), song))	{
 				printf("Downloaded %s!\n", song->title);
 			}
 
+		list_cleanup:
 			saavn_song_arr_free(songs);
 		}
 	}

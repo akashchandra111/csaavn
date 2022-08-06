@@ -1,3 +1,4 @@
+#include "id3v2lib/include/id3v2lib.h"
 #include "saavn_api_req.h"
 
 const char SEARCH_API_URL[] = "https://www.jiosaavn.com/api.php?__call=autocomplete.get&_format=json&_marker=0&cc=in&includeMetaTags=1&query=";
@@ -51,6 +52,20 @@ static size_t write_file(char *data, size_t size, size_t len, void *user_data)	{
 	} 
 
 	return total_written;
+}
+
+static bool add_id3v2_tag_details(saavn_song_t *song_details, char const *filename)	{
+	ID3v2_tag *tag = load_tag(filename);
+
+	if (tag == NULL)	tag = new_tag();
+	tag_set_title(song_details->title, 0, tag);
+	tag_set_album(song_details->album, 0, tag);
+
+	set_tag(filename, tag);
+
+	free_tag(tag);
+
+	return true;
 }
 
 bool saavn_perform_search(
@@ -124,7 +139,7 @@ bool saavn_get_song_url(char *song_id, size_t song_id_len, memory_dyn *mem)	{
 }
 
 
-bool saavn_song_download(char *appended_url, size_t url_len, char *filename, size_t filename_len)	{
+bool saavn_song_download(char *appended_url, size_t url_len, saavn_song_t *song_details)	{
 	CURL *handle; 
 	handle = curl_easy_init();
 
@@ -175,7 +190,7 @@ bool saavn_song_download(char *appended_url, size_t url_len, char *filename, siz
 		const char *DL_URL = SONG_DOWNLOAD_URL[download_url_idx];
 
 		if (search_url)	snprintf(search_url, SEARCH_URL_BUFFER_LEN-1, "%s%s/%s%s%s", DL_URL, dir1, dir2, BR, EXT);
-		if (saved_filename)	snprintf(saved_filename, FILENAME_BUFFER_LEN-1, "%s%s%s", filename, BR, EXT);
+		if (saved_filename)	snprintf(saved_filename, FILENAME_BUFFER_LEN-1, "%s%s%s", song_details->title, BR, EXT);
 
 		// printf("search url: %s\nfilename: %s\n", search_url, saved_filename);
 
@@ -200,6 +215,14 @@ bool saavn_song_download(char *appended_url, size_t url_len, char *filename, siz
 
 		if (file_len > 1024)	{
 			is_success = true;
+			// Add ID3v2 tag details
+			if (EXT[3] == '3')	{
+				printf("Song type is mp3, adding song metadata...\n");
+				add_id3v2_tag_details(song_details, saved_filename);
+			} else	{
+				printf("Song type is mp4, cant add song metadata.\n");
+			}
+
 			break;
 		} else	{
 			fprintf(stderr, "Couldn't download, retrying...\n");

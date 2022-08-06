@@ -1,0 +1,4 @@
+[submodule "id3v2lib"]
+	path = id3v2lib
+	url = https://github.com/larsbs/id3v2lib.git
+	branch = master
