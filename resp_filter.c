@@ -44,7 +44,7 @@ saavn_song_arr_t* filter_songs_from_search(memory_dyn *mem)	{
 	tok_idx += 1;
 
 	if (tok[tok_idx-1].size == 1 && tok[tok_idx].type == JSMN_ARRAY)	{
-		int const total_songs = 3; //tok[tok_idx].size;
+		int const total_songs = 3; // tok[tok_idx].size;
 		printf("count: %d\n", total_songs);
 		songs = saavn_song_arr_init(total_songs);
 
@@ -73,7 +73,10 @@ saavn_song_arr_t* filter_songs_from_search(memory_dyn *mem)	{
 					tok_idx += 2;	// title
 					memcpy(songs->song[i].title, &mem->buffer[tok[tok_idx].start], tok[tok_idx].end-tok[tok_idx].start);
 
-					tok_idx += 4;	// album
+					tok_idx += 2;	// image url
+					memcpy(songs->song[i].img_url, &mem->buffer[tok[tok_idx].start], tok[tok_idx].end-tok[tok_idx].start);
+
+					tok_idx += 2;	// album
 					memcpy(songs->song[i].album, &mem->buffer[tok[tok_idx].start], tok[tok_idx].end-tok[tok_idx].start);
 
 					tok_idx += 6;	// desc
@@ -94,11 +97,21 @@ void filter_song_url_from_search(size_t id_len, saavn_song_t *song, memory_dyn *
 
 	bool matches = false;
 	size_t tok_idx = 0;
+	
+	// Find token 'year'
+	while (tok_idx < parsed_count && !(matches = does_match(mem->buffer, &tok[tok_idx], JSMN_STRING, "year", 4)))	++tok_idx;
+
+	tok_idx += 1;	// Switched to values
+	memcpy(song->year, &mem->buffer[tok[tok_idx].start], tok[tok_idx].end-tok[tok_idx].start);
+
+	tok_idx += 14;	// singers
+	memcpy(song->singers, &mem->buffer[tok[tok_idx].start], tok[tok_idx].end-tok[tok_idx].start);
+
+	tok_idx += 10;	// language
+	memcpy(song->language, &mem->buffer[tok[tok_idx].start], tok[tok_idx].end-tok[tok_idx].start);
 
 	// Find token 'media_preview_url'
-	while (tok_idx < parsed_count && !(matches = does_match(mem->buffer, &tok[tok_idx], JSMN_STRING, "media_preview_url", 17)))	{
-		++tok_idx;
-	}
+	while (tok_idx < parsed_count && !(matches = does_match(mem->buffer, &tok[tok_idx], JSMN_STRING, "media_preview_url", 17)))	++tok_idx;
 
 	tok_idx += 1;
 	size_t split_idx = 0;

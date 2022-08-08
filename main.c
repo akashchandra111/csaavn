@@ -34,11 +34,11 @@ int main(void)	{
 			if (!songs)	goto end;
 			
 			for (int i=0; i<songs->len; ++i)	{
-				printf("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-				printf("┃Song name%6s: %-70s┃\n", "", songs->song[i].title);
-				printf("┃Description%4s: %-70s┃\n", "", songs->song[i].description);
-				printf("┃Album%10s: %-70s┃\n", "", songs->song[i].album);
-				printf("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+				printf("╭───────────────────────────────────────────────────────────────────────────────────────╮\n");
+				printf("│Song name%6s: %-70s│\n", "", songs->song[i].title);
+				printf("│Description%4s: %-70s│\n", "", songs->song[i].description);
+				printf("│Album%10s: %-70s│\n", "", songs->song[i].album);
+				printf("╰───────────────────────────────────────────────────────────────────────────────────────╯\n");
 			}
 
 			printf("Choose (%zu - %zu), -1 to quit: ", 1ul, songs->len);
@@ -65,11 +65,15 @@ int main(void)	{
 
 			if (saavn_get_song_url(id, id_len, resp))	{
 				filter_song_url_from_search(id_len, song, resp);
-				printf("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-				printf("┃Song name%6s: %-70s┃\n", "", song->title);
-				printf("┃Description%4s: %-70s┃\n", "", song->description);
-				printf("┃Album%10s: %-70s┃\n", "", song->album);
-				printf("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+				printf("╭───────────────────────────────────────────────────────────────────────────────────────╮\n");
+				printf("│Downloading song%71s│\n", "");
+				printf("│Song name%6s: %-70s│\n", "", song->title);
+				printf("│Description%4s: %-70s│\n", "", song->description);
+				printf("│Album%10s: %-70s│\n", "", song->album);
+				printf("│Year%11s: %-70s│\n", "", song->year);
+				printf("│Singers%8s: %-70s│\n", "", song->singers);
+				printf("│Language%7s: %-70s│\n", "", song->language);
+				printf("╰───────────────────────────────────────────────────────────────────────────────────────╯\n");
 			}
 
 			if (saavn_song_download(song->url, strlen(song->url), song))	{

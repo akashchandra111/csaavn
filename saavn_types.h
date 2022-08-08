@@ -18,10 +18,14 @@ typedef struct	{
 
 typedef struct	{
 	char url[256];
+	char img_url[256];
 	char description[128];
+	char singers[128];
 	char title[64];
 	char album[64];
+	char language[16];
 	char id[16];
+	char year[5];
 } saavn_song_t;
 
 typedef struct	{

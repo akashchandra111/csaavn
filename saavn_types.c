@@ -64,7 +64,7 @@ saavn_song_arr_t* saavn_song_arr_init(size_t song_count)	{
 	saavn_song_arr_t *songs = (saavn_song_arr_t *) malloc(sizeof(saavn_song_arr_t));
 
 	if (songs)	{
-		songs->song = (saavn_song_t *) malloc(sizeof(saavn_album_t) * song_count);
+		songs->song = (saavn_song_t *) malloc(sizeof(saavn_song_t) * song_count);
 		
 		if (songs->song)	{
 			songs->len = song_count;

@@ -1,17 +1,10 @@
-#include "id3v2lib/include/id3v2lib.h"
 #include "saavn_api_req.h"
 
 const char SEARCH_API_URL[] = "https://www.jiosaavn.com/api.php?__call=autocomplete.get&_format=json&_marker=0&cc=in&includeMetaTags=1&query=";
 const char SONG_API_URL[] = "https://www.jiosaavn.com/api.php?__call=song.getDetails&cc=in&_marker=0%3F_marker%3D0&_format=json&pids=";
-// const char ALBUM_API_URL[] = "https://www.jiosaavn.com/api.php?__call=content.getAlbumDetails&_format=json&cc=in&_marker=0%3F_marker%3D0&albumid=";
-// const char PLAYLIST_API_URL[] = "https://www.jiosaavn.com/api.php?__call=playlist.getDetails&_format=json&cc=in&_marker=0%3F_marker%3D0&listid=";
-// const char LYRICS_API_URL[] = "https://www.jiosaavn.com/api.php?__call=lyrics.getLyrics&ctx=web6dot0&api_version=4&_format=json&_marker=0%3F_marker%3D0&lyrics_id=";
 
 const size_t SEARCH_API_URL_LEN = sizeof(SEARCH_API_URL);
 const size_t SONG_API_URL_LEN = sizeof(SONG_API_URL);
-// const size_t ALBUM_API_URL_LEN = sizeof(ALBUM_API_URL);
-// const size_t PLAYLIST_API_URL_LEN = sizeof(PLAYLIST_API_URL);
-// const size_t LYRICS_API_URL_LEN = sizeof(LYRICS_API_URL);
 
 const char SONG_DOWNLOAD_URL[][64] = {
 	"https://sklktcdnems07.cdnsrv.jio.com/jiosaavn.cdn.jio.com/",
@@ -52,20 +45,6 @@ static size_t write_file(char *data, size_t size, size_t len, void *user_data)	{
 	} 
 
 	return total_written;
-}
-
-static bool add_id3v2_tag_details(saavn_song_t *song_details, char const *filename)	{
-	ID3v2_tag *tag = load_tag(filename);
-
-	if (tag == NULL)	tag = new_tag();
-	tag_set_title(song_details->title, 0, tag);
-	tag_set_album(song_details->album, 0, tag);
-
-	set_tag(filename, tag);
-
-	free_tag(tag);
-
-	return true;
 }
 
 bool saavn_perform_search(
@@ -195,7 +174,7 @@ bool saavn_song_download(char *appended_url, size_t url_len, saavn_song_t *song_
 		// printf("search url: %s\nfilename: %s\n", search_url, saved_filename);
 
 		FILE *file_ptr = fopen(saved_filename, "wb");
-
+		
 		// set-up cURL
 		curl_easy_setopt(handle, CURLOPT_URL, search_url);
 		curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_file);
@@ -215,14 +194,6 @@ bool saavn_song_download(char *appended_url, size_t url_len, saavn_song_t *song_
 
 		if (file_len > 1024)	{
 			is_success = true;
-			// Add ID3v2 tag details
-			if (EXT[3] == '3')	{
-				printf("Song type is mp3, adding song metadata...\n");
-				add_id3v2_tag_details(song_details, saved_filename);
-			} else	{
-				printf("Song type is mp4, cant add song metadata.\n");
-			}
-
 			break;
 		} else	{
 			fprintf(stderr, "Couldn't download, retrying...\n");
