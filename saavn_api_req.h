@@ -8,6 +8,7 @@
 
 #include "memory.h"
 #include "saavn_types.h"
+#include "id3_helper.h"
 
 bool saavn_perform_search(
 	char const *song_name, 
@@ -25,6 +26,11 @@ bool saavn_song_download(
 	char *appended_url, 
 	size_t url_len, 
 	saavn_song_t *song_details
+);
+
+bool saavn_image_art_download(
+	char *image_url, 
+	memory_dyn *mem
 );
 
 #endif
