@@ -206,7 +206,7 @@ bool saavn_song_download(char *appended_url, size_t url_len, saavn_song_t *song_
 		const char *DL_URL = SONG_DOWNLOAD_URL[download_url_idx];
 
 		if (search_url)	snprintf(search_url, SEARCH_URL_BUFFER_LEN-1, "%s%s/%s%s%s", DL_URL, dir1, dir2, BR, EXT);
-		if (saved_filename)	snprintf(saved_filename, FILENAME_BUFFER_LEN-1, "%s%s%s", song_details->title, BR, EXT);
+		if (saved_filename)	snprintf(saved_filename, FILENAME_BUFFER_LEN-1, "%s%s", song_details->title, EXT);
 
 		// set-up cURL
 		curl_easy_setopt(handle, CURLOPT_URL, search_url);

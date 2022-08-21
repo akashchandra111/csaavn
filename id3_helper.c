@@ -64,7 +64,7 @@ static void write_frame(uint8_t const frame_data[static 10], uint32_t const fram
 	mem->size += frame_len;
 
 	// data
-	mem->buffer[mem->size] = '\0';
+	mem->buffer[mem->size] = 0x03;
 	mem->size += 1;
 	memcpy(&mem->buffer[mem->size], data, data_len);
 	mem->size += data_len;
@@ -90,7 +90,7 @@ void write_id3(saavn_song_t const *song, memory_dyn *mem)	{
 			0, 0,					// TAG FLG
 		},
 		[ID3_ARTIST] = {
-			'T', 'O', 'P', 'E',		// TAG NAME
+			'T', 'P', 'E', '1',		// TAG NAME
 			0, 0, 0, 0,				// TAG SZ
 			0, 0,					// TAG FLG
 		},

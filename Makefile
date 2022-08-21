@@ -1,5 +1,5 @@
-CC := clang 
-OPTS := -Os -g -fsanitize=address -fsanitize=undefined
+CC := zig cc
+OPTS := -Os# -g -fsanitize=address -fsanitize=undefined
 LIBS := -lcurl
 WARN := -Wall -Wundef -Werror
 MAKE := make
