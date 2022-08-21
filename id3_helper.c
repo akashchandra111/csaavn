@@ -135,20 +135,15 @@ void write_id3(saavn_song_t const *song, memory_dyn *mem)	{
 	};
 
 	uint32_t total_frame_data_len = 0;
-
 	for (size_t i=0; i<total_frames; ++i)	total_frame_data_len += id3_frame_len[i];
 
 	uint32_t const total_tag_len = id3_header_len + ((id3_single_frame_len + 1) * total_frames) + total_frame_data_len;
 	uint32_t const total_tag_usync_len = id3_encode_size(total_tag_len);
 
 	// size_modification
-	//*((uint32_t *) &id3_header[6]) = total_tag_usync_len;
 	memcpy(&id3_header[6], &total_tag_usync_len, 4);
 
-	for (size_t i=0; i<total_frames; ++i)	{
-		memcpy(&id3_frames[i][4], &id3_frame_usync_len[i], 4);
-		//*((uint32_t *) &id3_frames[i][4]) = id3_frame_usync_len[i];
-	}
+	for (size_t i=0; i<total_frames; ++i)	memcpy(&id3_frames[i][4], &id3_frame_usync_len[i], 4);
 
 	// memory copy
 	// ID3 header
@@ -164,3 +159,43 @@ void write_id3(saavn_song_t const *song, memory_dyn *mem)	{
 	write_frame(id3_frames[ID3_ALBUM], id3_single_frame_len, song->album, id3_frame_len[ID3_ALBUM], mem); 		// Album
 }
 
+void write_id3_image(memory_dyn* mem, memory_dyn const* image_data, char const* mime_type)	{
+	uint32_t const image_frame_len = 11;
+	uint32_t const mime_type_len = strlen(mime_type);
+
+	uint8_t image_frame[11] = {
+		'A', 'P', 'I', 'C',		// TAG NAME
+		0, 0, 0, 0,				// TAG SIZE
+		0, 0,					// TAG FLAG
+		0						// ENC
+	};
+
+	uint8_t image_frame_ext[3] = {
+		0,						// MIME END
+		3,						// PIC TYPE (Cover)
+		0,						// DESC
+	};
+
+	uint32_t total_frame_len = image_frame_len + mime_type_len + image_data->size;
+	uint32_t total_frame_usync_len = id3_encode_size(total_frame_len);
+
+	memcpy(&image_frame[4], &total_frame_usync_len, 4);	// modify total size in frame
+	
+	memcpy(&mem->buffer[mem->size], image_frame, image_frame_len);
+	mem->size += image_frame_len;
+
+	memcpy(&mem->buffer[mem->size], mime_type, mime_type_len);
+	mem->size += mime_type_len;
+
+	memcpy(&mem->buffer[mem->size], image_frame_ext, 3);
+	mem->size += 3;
+
+	memcpy(&mem->buffer[mem->size], image_data->buffer, image_data->size);
+	mem->size += image_data->size;
+
+	// modify new size;
+	uint32_t const new_tag_usync_size = id3_encode_size(mem->size);
+	
+	// size_modification
+	memcpy(&mem->buffer[6], &new_tag_usync_size, 4);
+}

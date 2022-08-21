@@ -6,7 +6,7 @@ memory_dyn* mem_dyn_init(size_t size)	{
 		memory_dyn *mem = (memory_dyn *) malloc(sizeof(memory_dyn));
 
 		if (mem)	{
-			mem->buffer = (char*) malloc(size);
+			mem->buffer = (char *) malloc(size);
 
 			if (mem->buffer)	{
 				mem->buf_sz = size;

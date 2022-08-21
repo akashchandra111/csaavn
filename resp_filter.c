@@ -73,10 +73,7 @@ saavn_song_arr_t* filter_songs_from_search(memory_dyn *mem)	{
 					tok_idx += 2;	// title
 					memcpy(songs->song[i].title, &mem->buffer[tok[tok_idx].start], tok[tok_idx].end-tok[tok_idx].start);
 
-					tok_idx += 2;	// image url
-					memcpy(songs->song[i].img_url, &mem->buffer[tok[tok_idx].start], tok[tok_idx].end-tok[tok_idx].start);
-
-					tok_idx += 2;	// album
+					tok_idx += 4;	// album
 					memcpy(songs->song[i].album, &mem->buffer[tok[tok_idx].start], tok[tok_idx].end-tok[tok_idx].start);
 
 					tok_idx += 6;	// desc
@@ -107,7 +104,10 @@ void filter_song_url_from_search(size_t id_len, saavn_song_t *song, memory_dyn *
 	tok_idx += 14;	// singers
 	memcpy(song->singers, &mem->buffer[tok[tok_idx].start], tok[tok_idx].end-tok[tok_idx].start);
 
-	tok_idx += 10;	// language
+	tok_idx += 4;	// image url
+	memcpy(song->img_url, &mem->buffer[tok[tok_idx].start], tok[tok_idx].end-tok[tok_idx].start);
+
+	tok_idx += 6;	// language
 	memcpy(song->language, &mem->buffer[tok[tok_idx].start], tok[tok_idx].end-tok[tok_idx].start);
 
 	// Find token 'media_preview_url'

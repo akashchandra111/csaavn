@@ -110,8 +110,17 @@ bool saavn_image_art_download(char *image_url, memory_dyn *mem)	{
 
 	CURL *handle = curl_easy_init();
 
+	char sanitized_url[256] = {};
+
+	for (size_t i=0, j=0; image_url[i] != '\0'; ++i)	{
+		if (image_url[i] != '\\') {
+			sanitized_url[j++] = image_url[i];
+		}
+	}
+
 	if (handle)	{
-		curl_easy_setopt(handle, CURLOPT_URL, image_url);
+		curl_easy_setopt(handle, CURLOPT_URL, sanitized_url);
+		curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 2L);
 		curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_buffer_cb);
 		curl_easy_setopt(handle, CURLOPT_WRITEDATA, mem);
 
@@ -174,12 +183,22 @@ bool saavn_song_download(char *appended_url, size_t url_len, saavn_song_t *song_
 	char * const search_url = (char *) malloc(SEARCH_URL_BUFFER_LEN);
 	char * const saved_filename = (char *) malloc(FILENAME_BUFFER_LEN);
 
-	memory_dyn *song_meta = mem_dyn_init(32 * 1024);			// 32 KB
+	memory_dyn *song_meta = mem_dyn_init(72 * 1024);			// 72 KB
+	memory_dyn *song_image = mem_dyn_init(64 * 1024);			// 64 KB
 	memory_dyn *song_buffer = mem_dyn_init(24 * 1024 * 1024);	// 24 MB
 	
 	if (!search_url || !saved_filename || !song_meta || !song_buffer)	goto cleanup;
 
 	write_id3(song_details, song_meta);
+	if (saavn_image_art_download(song_details->img_url, song_image))	{
+		char const *image_mime_type[2] = { "image/png", "image/jpeg" };
+		size_t mime_idx = 0;
+		size_t const image_url_len = strlen(song_details->img_url);
+
+		if (song_details->img_url[image_url_len-2] == 'p' || song_details->img_url[image_url_len-2] == 'e')	mime_idx = 1;
+
+		write_id3_image(song_meta, song_image, image_mime_type[mime_idx]);
+	}
 
 	while (true)	{
 		const char *EXT = EXTENSION[ext_idx];
@@ -203,13 +222,18 @@ bool saavn_song_download(char *appended_url, size_t url_len, saavn_song_t *song_
 		
 		if (song_buffer->size > 1024)	{
 			// remove unwanted data
-			uint32_t header_size = *((uint32_t*) &song_buffer->buffer[6]);
-			uint32_t music_start_idx = id3_decode_size(header_size);
 
+			uint32_t header_size = 0;
+			memcpy(&header_size, &song_buffer->buffer[6], 4);
+			uint32_t music_start_idx = id3_decode_size(header_size);
 
 			FILE *file_ptr = fopen(saved_filename, "wb");
 			if (file_ptr)	{
-				fwrite(song_meta->buffer, song_meta->size, 1, file_ptr);
+				if (EXTENSION[ext_idx][3] == '3')	{
+					fwrite(song_meta->buffer, song_meta->size, 1, file_ptr);	// write metadata for mp3
+				} else	{
+					music_start_idx = 0;
+				}
 				fwrite(&song_buffer->buffer[music_start_idx], song_buffer->size - music_start_idx, 1, file_ptr);
 				fclose(file_ptr);
 			}
@@ -217,6 +241,8 @@ bool saavn_song_download(char *appended_url, size_t url_len, saavn_song_t *song_
 			is_success = true;
 			break;
 		}
+
+		printf("Can't download, retrying...\n");
 
 		// failed attempt?
 		if (bitrate_idx == BITRATES_LEN-1)	{
@@ -237,6 +263,7 @@ cleanup:
 	if (search_url)	free(search_url);
 	if (saved_filename)	free(saved_filename);
 	if (song_meta)	mem_dyn_free(song_meta);
+	if (song_image)	mem_dyn_free(song_image);
 	if (song_buffer)	mem_dyn_free(song_buffer);
 
 	if (handle)	curl_easy_cleanup(handle);
