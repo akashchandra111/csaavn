@@ -111,9 +111,15 @@ bool saavn_image_art_download(char *image_url, memory_dyn *mem)	{
 	CURL *handle = curl_easy_init();
 
 	char sanitized_url[256] = {};
+	size_t const image_url_len = strlen(image_url);
 
-	for (size_t i=0, j=0; image_url[i] != '\0'; ++i)	{
-		if (image_url[i] != '\\') {
+	for (size_t i=0, j=0; i < image_url_len; ++i)	{
+		if (i+2 < image_url_len && image_url[i] == '1' && image_url[i+1] == '5' && image_url[i+2] == '0')	{
+			sanitized_url[j++] = '5';
+			sanitized_url[j++] = '0';
+			sanitized_url[j++] = '0';
+			i+=2;
+		} else if (image_url[i] != '\\')	{
 			sanitized_url[j++] = image_url[i];
 		}
 	}
@@ -183,16 +189,16 @@ bool saavn_song_download(char *appended_url, size_t url_len, saavn_song_t *song_
 	char * const search_url = (char *) malloc(SEARCH_URL_BUFFER_LEN);
 	char * const saved_filename = (char *) malloc(FILENAME_BUFFER_LEN);
 
-	memory_dyn *song_meta = mem_dyn_init(72 * 1024);			// 72 KB
-	memory_dyn *song_image = mem_dyn_init(64 * 1024);			// 64 KB
+	memory_dyn *song_meta = mem_dyn_init(192 * 1024);			// 192 KB
+	memory_dyn *song_image = mem_dyn_init(128 * 1024);			// 128 KB
 	memory_dyn *song_buffer = mem_dyn_init(24 * 1024 * 1024);	// 24 MB
 	
 	if (!search_url || !saved_filename || !song_meta || !song_buffer)	goto cleanup;
 
 	write_id3(song_details, song_meta);
 	if (saavn_image_art_download(song_details->img_url, song_image))	{
-		char const *image_mime_type[2] = { "image/png", "image/jpeg" };
-		size_t mime_idx = 0;
+		char const *image_mime_type[3] = { "image/png", "image/jpeg", "image/gif" };
+		size_t mime_idx = 1;
 		size_t const image_url_len = strlen(song_details->img_url);
 
 		if (song_details->img_url[image_url_len-2] == 'p' || song_details->img_url[image_url_len-2] == 'e')	mime_idx = 1;

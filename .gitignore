@@ -3,3 +3,5 @@ saavn_cp
 .ccls
 .ccls-cache/
 test*
+*.mp3
+*.mp4
