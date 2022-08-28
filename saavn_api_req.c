@@ -8,16 +8,20 @@ const size_t SONG_API_URL_LEN = sizeof(SONG_API_URL);
 
 const char SONG_DOWNLOAD_URL[][64] = {
 	"https://sklktcdnems07.cdnsrv.jio.com/jiosaavn.cdn.jio.com/",
-	"https://sklktecdnems03.cdnsrv.jio.com/jiosaavn.cdn.jio.com/"
+	"https://sklktecdnems03.cdnsrv.jio.com/jiosaavn.cdn.jio.com/",
+	"https://snoidcdnems05.cdnsrv.jio.com/jiosaavn.cdn.jio.com/",
+	"https://snoidcdnems03.cdnsrv.jio.com/jiosaavn.cdn.jio.com/",
 };
 
-const char BITRATE[][5] = { "_320", "_256", "_128", "_96" };
+const char BITRATE[][5] = { "_320", "_160", "_256", "_128", "_96" };
 
 const char EXTENSION[][5] = { ".mp3", ".mp4" };
 
 const size_t SONG_DOWNLOAD_URL_LEN[] = {
 	sizeof(SONG_DOWNLOAD_URL[0]),
 	sizeof(SONG_DOWNLOAD_URL[1]),
+	sizeof(SONG_DOWNLOAD_URL[2]),
+	sizeof(SONG_DOWNLOAD_URL[3]),
 };
 
 const size_t DOWNLOAD_URLS_LEN = sizeof(SONG_DOWNLOAD_URL)/sizeof(SONG_DOWNLOAD_URL[0]);
@@ -251,16 +255,16 @@ bool saavn_song_download(char *appended_url, size_t url_len, saavn_song_t *song_
 		printf("Can't download, retrying...\n");
 
 		// failed attempt?
-		if (bitrate_idx == BITRATES_LEN-1)	{
+		if (bitrate_idx == BITRATES_LEN-1)      {
 			bitrate_idx = 0;
-			if (ext_idx == EXTENSIONS_LEN-1)	{
-				ext_idx = 0;
-				if (download_url_idx == DOWNLOAD_URLS_LEN-1)	{
-					download_url_idx = 0;
-					break;
-				} else	++download_url_idx;
-			} else	++ext_idx;
-		} else	++bitrate_idx;
+				if (ext_idx == EXTENSIONS_LEN-1)        {
+					ext_idx = 0;
+					if (download_url_idx == DOWNLOAD_URLS_LEN-1)    {
+						download_url_idx = 0;
+						break;
+					} else  ++download_url_idx;
+				} else  ++ext_idx;
+		} else  ++bitrate_idx;
 
 		song_buffer->size = 0;
 	}
