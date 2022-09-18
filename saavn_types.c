@@ -30,7 +30,7 @@ void saavn_song_free(saavn_song_t *song)	{
 	}
 }
 
-saavn_album_arr_t* saavn_album_arr_init(size_t album_count)	{
+saavn_album_arr_t* saavn_album_arr_init(size_t const album_count)	{
 	saavn_album_arr_t *albums = (saavn_album_arr_t *) malloc(sizeof(saavn_album_arr_t));
 
 	if (albums)	{
@@ -60,7 +60,7 @@ void saavn_album_arr_free(saavn_album_arr_t *albums)	{
 	}
 }
 
-saavn_song_arr_t* saavn_song_arr_init(size_t song_count)	{
+saavn_song_arr_t* saavn_song_arr_init(size_t const song_count)	{
 	saavn_song_arr_t *songs = (saavn_song_arr_t *) malloc(sizeof(saavn_song_arr_t));
 
 	if (songs)	{

@@ -6,7 +6,7 @@
 
 #define CHAR_BUF 256
 #define HALF_CHAR_BUF (CHAR_BUF/2)
-const int RESP_BUF_LEN = 1 * 1024 * 1024;	// 1 Meg
+const int RESP_BUF_LEN = 1 * 1024 * 1024;	// 1 MB
 
 static void url_escaped(char *str, size_t len)	{
 	for (size_t i=0; i<len; ++i)	{
@@ -32,6 +32,10 @@ int main(void)	{
 			saavn_song_arr_t *songs = filter_songs_from_search(resp);
 
 			if (!songs)	goto end;
+			if (songs->len == 0)	{
+				fprintf(stderr, "No songs found, exiting!\n");
+				goto end;
+			}
 			
 			for (int i=0; i<songs->len; ++i)	{
 				printf("╭───────────────────────────────────────────────────────────────────────────────────────╮\n");

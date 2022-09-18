@@ -44,7 +44,7 @@ saavn_song_arr_t* filter_songs_from_search(memory_dyn *mem)	{
 	tok_idx += 1;
 
 	if (tok[tok_idx-1].size == 1 && tok[tok_idx].type == JSMN_ARRAY)	{
-		int const total_songs = 3; // tok[tok_idx].size;
+		int const total_songs = tok[tok_idx].size;
 		printf("count: %d\n", total_songs);
 		songs = saavn_song_arr_init(total_songs);
 
@@ -73,7 +73,10 @@ saavn_song_arr_t* filter_songs_from_search(memory_dyn *mem)	{
 					tok_idx += 2;	// title
 					memcpy(songs->song[i].title, &mem->buffer[tok[tok_idx].start], tok[tok_idx].end-tok[tok_idx].start);
 
-					tok_idx += 4;	// album
+					tok_idx += 2;	// image URL
+					// memcpy(songs->song[i].img_url, &mem->buffer[tok[tok_idx].start], tok[tok_idx].end-tok[tok_idx].start);
+
+					tok_idx += 2;	// album
 					memcpy(songs->song[i].album, &mem->buffer[tok[tok_idx].start], tok[tok_idx].end-tok[tok_idx].start);
 
 					tok_idx += 6;	// desc

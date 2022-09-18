@@ -39,10 +39,10 @@ void saavn_album_free(saavn_album_t *);
 saavn_song_t* saavn_song_init();
 void saavn_song_free(saavn_song_t *);
 
-saavn_album_arr_t* saavn_album_arr_init(size_t album_count);
+saavn_album_arr_t* saavn_album_arr_init(size_t const album_count);
 void saavn_album_arr_free(saavn_album_arr_t*);
 
-saavn_song_arr_t* saavn_song_arr_init(size_t song_count);
+saavn_song_arr_t* saavn_song_arr_init(size_t const song_count);
 void saavn_song_arr_free(saavn_song_arr_t*);
 
 #endif

@@ -1,5 +1,5 @@
 CC := zig cc
-OPTS := -Os# -g -fsanitize=address -fsanitize=undefined
+OPTS := -Os -flto # -g -fsanitize=address -fsanitize=undefined
 LIBS := -lcurl
 WARN := -Wall -Wundef -Werror
 MAKE := make
