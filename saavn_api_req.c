@@ -114,7 +114,7 @@ bool saavn_image_art_download(char *image_url, memory_dyn *mem)	{
 
 	CURL *handle = curl_easy_init();
 
-	char sanitized_url[256] = {};
+	char sanitized_url[256] = { 0 };
 	size_t const image_url_len = strlen(image_url);
 
 	for (size_t i=0, j=0; i < image_url_len; ++i)	{
@@ -131,7 +131,7 @@ bool saavn_image_art_download(char *image_url, memory_dyn *mem)	{
 		}
 	}
 
-	printf("Album art URL: %s\n", sanitized_url);
+	// printf("Album art URL: %s\n", sanitized_url);
 
 	if (handle)	{
 		curl_easy_setopt(handle, CURLOPT_URL, sanitized_url);

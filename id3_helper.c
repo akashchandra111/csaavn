@@ -1,5 +1,7 @@
 #include "id3_helper.h"
 
+#include <endian.h>
+
 uint8_t const ID3_VERSION = 0x04;
 uint8_t const ID3_REVISION = 0x00;
 uint8_t const ID3_FLAG = 0x00;
@@ -14,7 +16,7 @@ typedef enum {
 } id3_tag;
 
 uint32_t id3_decode_size(uint32_t size)	{
-#if LITTLE_ENDIAN
+#if __BYTE_ORDER__ == __LITTLE_ENDIAN
 	uint8_t const fourth = (size >> 24) & 0x7F;
 	uint8_t const third = (size >> 16) & 0x7F;
 	uint8_t const second = (size >> 8) & 0x7F;
@@ -25,14 +27,14 @@ uint32_t id3_decode_size(uint32_t size)	{
 	uint8_t const third = (size >> 8) & 0x7F;
 	uint8_t const fourth = (size) & 0x7F;
 #else
-#warn "Not supported"
+#error "Not supported"
 #endif
 
 	return (first << 21) | (second << 14) | (third << 7) | fourth; 
 }
 
 uint32_t id3_encode_size(uint32_t size)	{
-#if LITTLE_ENDIAN
+#if __BYTE_ORDER__ == __LITTLE_ENDIAN
 	uint8_t const fourth = (size >> 21) & 0x7F;
 	uint8_t const third = (size >> 14) & 0x7F;
 	uint8_t const second = (size >> 7) & 0x7F;
@@ -43,7 +45,7 @@ uint32_t id3_encode_size(uint32_t size)	{
 	uint8_t const third = (size >> 7) & 0x7F;
 	uint8_t const fourth = (size) & 0x7F;
 #else
-#warn "Not supported"
+#error "Not supported"
 #endif
 
 	return (first << 24) | (second << 16) | (third << 8) | fourth;
